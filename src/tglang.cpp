@@ -66,7 +66,7 @@ static bool inited = [](){
  return true;
 }();
 
-void preprocess_text(const char* text, long** input_data, size_t* input_data_size, int64_t* input_dims, size_t* num_input_dims) {
+void preprocess_text(const char* text, int64_t** input_data, size_t* input_data_size, int64_t* input_dims, size_t* num_input_dims) {
 	auto token_ids = tokenizer->encode(text, 256);
 	
 	// Ensure the token_ids size is 64, padding with PAD_TOKEN_INDEX if necessary
@@ -75,7 +75,7 @@ void preprocess_text(const char* text, long** input_data, size_t* input_data_siz
 	// Set the fixed input_data_size
 	*input_data_size = INPUT_DATA_SIZE;
 	
-	*input_data = new long[*input_data_size];
+	*input_data = new int64_t[*input_data_size];
 	if (token_ids.size() < *input_data_size) {
 		printf("Error: Source data size is less than destination array size.\n");
 		// Handle error
@@ -96,13 +96,13 @@ void preprocess_text(const char* text, long** input_data, size_t* input_data_siz
 }
 
 enum TglangLanguage tglang_detect_programming_language(const char *text) {
-	long* input_data;
+	int64_t* input_data;
 	size_t input_data_size;
 	int64_t input_dims[2];
 	size_t num_input_dims = 2;
 
 	preprocess_text(text, &input_data, &input_data_size, input_dims, &num_input_dims);
-	auto input_tensor = Ort::Value::CreateTensor<long>(memory_info, input_data, input_data_size, input_dims, num_input_dims);
+	auto input_tensor = Ort::Value::CreateTensor<int64_t>(memory_info, input_data, input_data_size, input_dims, num_input_dims);
 
 	std::vector<const char*> input_node_names = {"input"};
 	std::vector<const char*> output_node_names = {"output"};
