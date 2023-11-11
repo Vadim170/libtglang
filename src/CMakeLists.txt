@@ -19,7 +19,13 @@ configure_file(
 option(ONNXRUNTIME_ROOTDIR "onnxruntime root dir")
 
 if(NOT ONNXRUNTIME_ROOTDIR)
-	set(ONNXRUNTIME_ROOTDIR "onnxruntime-linux-x64-1.15.1")
+	if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+		set(ONNXRUNTIME_ROOTDIR "onnxruntime-linux-x64-1.15.1")
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+		set(ONNXRUNTIME_ROOTDIR "onnxruntime-osx-arm64-1.15.1")
+	else()
+		message(FATAL_ERROR "Unsupported platform or architecture")
+	endif()
 endif()
 
 include_directories(
