@@ -7,6 +7,8 @@ project(tglang VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -march=native")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-trigraphs")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-trigraphs")
 
 set(VOCAB_FILE /resources/vocab.json)
 set(MERGES_FILE /resources/merges.txt)
@@ -37,7 +39,9 @@ include_directories(
 link_directories("${ONNXRUNTIME_ROOTDIR}/lib")
 
 add_library(tglang SHARED	tglang.cpp
-							simdjson.cpp)
+							vocab_keys.cpp
+							merges_data.cpp
+							model_wrapper.cpp)
 
 target_link_libraries(tglang PRIVATE onnxruntime)
 

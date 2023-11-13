@@ -1,0 +1,1 @@
+xxd -i resources/model.onnx > model_data.h

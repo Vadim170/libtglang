@@ -3,22 +3,16 @@
 #include <dlfcn.h>
 #include <onnxruntime_cxx_api.h>
 #include <cpu_provider_factory.h>
+// #include <chrono>
 
 #include "config.hpp"
 #include "GPT2Tokenizer.hpp"
+#include "model_wrapper.h"
 
 #define BATCH_SIZE 1
 #define INPUT_DATA_SIZE 256
 #define PAD_TOKEN_INDEX 50257
 #define NUM_CORES 9
-
-std::string GetLibraryPath() {
-	Dl_info dl_info;
-	if (dladdr((void*)&GetLibraryPath, &dl_info) != 0) {
-		return dl_info.dli_fname;
-	}
-	return ""; // Failed to get the path
-}
 
 template <typename T>
 T unwrap(std::optional<T>&& value, const std::string& error_msg) {
@@ -35,28 +29,48 @@ static std::unique_ptr<GPT2Tokenizer> tokenizer = nullptr;
 static std::unique_ptr<Ort::Session> onnx_session = nullptr;
 
 void my_init_function(void) {
-	std::string libraryPath = GetLibraryPath();
-	std::string vocabPath = libraryPath.substr(0, libraryPath.find_last_of("/\\"));
-	std::string mergesPath = libraryPath.substr(0, libraryPath.find_last_of("/\\"));
-	vocabPath += vocab_file;
-	mergesPath += merges_file;
-	
-	GPT2Tokenizer loadedTokenizer = unwrap(GPT2Tokenizer::load(vocabPath.c_str(), mergesPath.c_str()), "Error initializing GPT2 tokenizer\n");
+	std::chrono::steady_clock::time_point start_time, end_time;
+	std::chrono::duration<double, std::milli> elapsed_time;
+	start_time = std::chrono::steady_clock::now();
+
+
+	GPT2Tokenizer loadedTokenizer = unwrap(GPT2Tokenizer::load(), "Error initializing GPT2 tokenizer\n");
 
 	// Wrap the loaded tokenizer in a std::unique_ptr
 	tokenizer = std::make_unique<GPT2Tokenizer>(loadedTokenizer);
 
-	std::string modelPath = libraryPath.substr(0, libraryPath.find_last_of("/\\"));
-	modelPath += model_file;
 
+	end_time = std::chrono::steady_clock::now();
+	elapsed_time = end_time - start_time;
+	printf("Time to load tokenizer: %.4f ms\n", elapsed_time.count());
+	start_time = std::chrono::steady_clock::now();
+
+
+	OrtEnv* environment;
+	OrtThreadingOptions* envOpts = nullptr;
+	Ort::GetApi().CreateThreadingOptions(&envOpts);
+	Ort::GetApi().SetGlobalIntraOpNumThreads(envOpts, NUM_CORES);
+	Ort::GetApi().SetGlobalSpinControl(envOpts, 1);
+	Ort::GetApi().CreateEnvWithGlobalThreadPools(ORT_LOGGING_LEVEL_WARNING, "test", envOpts, &environment);
 	Ort::Env env(ORT_LOGGING_LEVEL_ERROR, "test");
 	Ort::SessionOptions session_options;
 	session_options.SetIntraOpNumThreads(NUM_CORES);
-	session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+	session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL); //ORT_ENABLE_ALL); // For speed up 
+	session_options.SetExecutionMode(ExecutionMode::ORT_PARALLEL);
 	uint32_t filter_flags = 0;  // 0 means use all available providers
 	Ort::GetAvailableProviders();
+
 	
-	onnx_session = std::make_unique<Ort::Session>(env, modelPath.c_str(), session_options);
+	end_time = std::chrono::steady_clock::now();
+	elapsed_time = end_time - start_time;
+	printf("Initialization time: %.4f ms\n", elapsed_time.count());
+	start_time = std::chrono::steady_clock::now();
+	
+	onnx_session = std::make_unique<Ort::Session>(env, get_resources_model_onnx(), get_resources_model_onnx_len(), session_options);
+
+	end_time = std::chrono::steady_clock::now();
+	elapsed_time = end_time - start_time;
+	printf("Model prepare time: %.4f ms\n", elapsed_time.count());
 }
 
 // Use the constructor attribute to specify that my_init_function should be executed on library load
@@ -96,6 +110,10 @@ void preprocess_text(const char* text, int64_t** input_data, size_t* input_data_
 }
 
 enum TglangLanguage tglang_detect_programming_language(const char *text) {
+	std::chrono::steady_clock::time_point start_time, end_time;
+	std::chrono::duration<double, std::milli> elapsed_time;
+	start_time = std::chrono::steady_clock::now();
+
 	int64_t* input_data;
 	size_t input_data_size;
 	int64_t input_dims[2];
@@ -108,16 +126,30 @@ enum TglangLanguage tglang_detect_programming_language(const char *text) {
 	std::vector<const char*> output_node_names = {"output"};
 	Ort::Value output_tensor{nullptr};
 
+	end_time = std::chrono::steady_clock::now();
+	elapsed_time = end_time - start_time;
+	printf("Preprocess text time: %.4f ms\n", elapsed_time.count());
+	start_time = std::chrono::steady_clock::now();
+
 	onnx_session->Run(Ort::RunOptions{nullptr}, input_node_names.data(), &input_tensor, 1, output_node_names.data(), &output_tensor, 1);
 	
 	float* floatarr = output_tensor.GetTensorMutableData<float>();
-	size_t max_index = 0;
+	int8_t max_index = 0;
 	float max_value = floatarr[0];
-	for (size_t i = 1; i < TGLANG_LANGUAGE_COUNT; ++i) {
+	for (int8_t i = 1; i < TGLANG_LANGUAGE_COUNT; ++i) {
+		printf("run: %d %.5f ms\n", i, floatarr[i]);
 		if (floatarr[i] > max_value) {
 			max_value = floatarr[i];
 			max_index = i;
 		}
+	}
+
+	end_time = std::chrono::steady_clock::now();
+	elapsed_time = end_time - start_time;
+	printf("Run time: %.4f ms\n", elapsed_time.count());
+
+	if(max_value < 0.6) {
+		return (enum TglangLanguage)TGLANG_LANGUAGE_OTHER;
 	}
 	return (enum TglangLanguage)max_index;
 }

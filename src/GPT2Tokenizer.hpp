@@ -6,7 +6,8 @@
 #include <numeric>
 
 #include "ctre-unicode.hpp"
-#include "simdjson.h"
+#include "merges_data.h"
+#include "vocab_keys.h"
 
 #include <stdio.h>
 
@@ -31,30 +32,31 @@ std::unordered_map<std::string, char> unicode_to_bytes() {
 	return code_map;
 }
 
-class GPT2Tokenizer {
-
-	struct PairHash
+struct PairHash
+{
+	std::size_t operator()(const std::pair<std::string, std::string>& p) const noexcept
 	{
-		std::size_t operator()(const std::pair<std::string, std::string>& p) const noexcept
-		{
-			std::size_t seed = 0;
-			hash_combine(seed, p.first);
-			hash_combine(seed, p.second);
-			return seed;
-		}
-	};
+		std::size_t seed = 0;
+		hash_combine(seed, p.first);
+		hash_combine(seed, p.second);
+		return seed;
+	}
+};
+using BPE = std::pair<std::string, std::string>;
+using BPERanks = std::unordered_map<BPE, size_t, PairHash>;
+using Encoder = std::unordered_map<std::string, int16_t>;
 
-	using BPE = std::pair<std::string, std::string>;
-	using BPERanks = std::unordered_map<BPE, size_t, PairHash>;
-	using Encoder = std::unordered_map<std::string, int64_t>;
-	using Decoder = std::unordered_map<int64_t, std::string>;
+class GPT2Tokenizer {
 
 	// who knows what this does
 	static constexpr std::string_view pattern {"'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"};
 
 public:
 
-	static std::optional<GPT2Tokenizer> load(std::string_view vocab_file, std::string_view merges_file);
+	// static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input);
+	static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input1,
+		const std::array<std::string, SIZE_BPE_RANKS2>& input2);
+	static std::optional<GPT2Tokenizer> load();
 
 	std::vector<int64_t> encode(const std::string&, const int max_len);
 	std::string decode(const std::vector<int64_t>&);
@@ -68,61 +70,88 @@ public:
 
 	BPERanks m_bpe_ranks;
 	Encoder m_encoder;
-	Decoder m_decoder;
 	std::unordered_map<char, std::string> m_byte_encoder;
-	std::unordered_map<std::string, char> m_byte_decoder;
 
 private:
 	std::vector<std::string> bpe(const std::string& token);
 };
 
-std::optional<GPT2Tokenizer> GPT2Tokenizer::load(std::string_view vocab_file, std::string_view merges_file) {
+// BPERanks GPT2Tokenizer::vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input)
+// {
+//     BPERanks bpeRanks;
+//     int32_t index = 0;
+//     std::pair<std::string, std::string> pair;
 
-	// load merges file
-	std::ifstream merges_file_stream;
-	// assuming null-terminated string
-	merges_file_stream.open(merges_file.data());
+//     for (const std::string& str : input)
+//     {
+//         if (pair.first.empty())
+//         {
+//             pair.first = str;
+//         }
+//         else
+//         {
+//             pair.second = str;
+//             bpeRanks[pair] = index++;
+//             pair.first.clear();
+//             pair.second.clear();
+//         }
+//     }
 
-	if (!merges_file_stream.good()) {
-		return std::nullopt;
-	}
+//     return bpeRanks;
+// }
+BPERanks GPT2Tokenizer::vectorToBPERanks(
+    const std::array<std::string, SIZE_BPE_RANKS>& input1,
+    const std::array<std::string, SIZE_BPE_RANKS2>& input2)
+{
+    BPERanks bpeRanks;
+    int32_t index = 0;
+    std::pair<std::string, std::string> pair;
 
-	BPERanks bpe_ranks;
+    for (const std::string& str : input1)
+    {
+        if (pair.first.empty())
+        {
+            pair.first = str;
+        }
+        else
+        {
+            pair.second = str;
+            bpeRanks[pair] = index++;
+            pair.first.clear();
+            pair.second.clear();
+        }
+    }
 
-	std::string merges_version;
-	std::getline(merges_file_stream, merges_version);
+    for (const std::string& str : input2)
+    {
+        if (pair.first.empty())
+        {
+            pair.first = str;
+        }
+        else
+        {
+            pair.second = str;
+            bpeRanks[pair] = index++;
+            pair.first.clear();
+            pair.second.clear();
+        }
+    }
 
-	for (struct{std::string line; size_t i{0};} it; std::getline(merges_file_stream, it.line); ++it.i) {
-		const size_t split_point = it.line.find(' ');
-		std::pair<std::string, std::string> p{{it.line.begin(), it.line.begin()+split_point},
-											{it.line.begin() + split_point + 1, it.line.end()}};
-		bpe_ranks.emplace(std::move(p), it.i);
-	}
+    return bpeRanks;
+}
 
-	simdjson::dom::parser parser;
-	simdjson::dom::object object;
-	// assuming null-terminated string
-	simdjson::dom::element doc = parser.load(vocab_file.data());
-
-	auto error = doc.get(object);
-	if (error) { 
-		return std::nullopt; 
-	}
-
+std::optional<GPT2Tokenizer> GPT2Tokenizer::load() {
 	Encoder encoder;
-	Decoder decoder;
-
-	for (const auto& [key, value] : object) {
-		encoder.emplace(key, value);
-		decoder.emplace(value, key);
+	
+	const std::array<std::string, SIZE_VOCAB_KEYS> vocab_keys = get_vocab_keys();
+	for (size_t i = 0; i < SIZE_VOCAB_KEYS; ++i) {
+		encoder.emplace(vocab_keys[i], static_cast<int64_t>(i));
 	}
 
 	auto result = GPT2Tokenizer();
-	result.m_bpe_ranks = std::move(bpe_ranks);
+	result.m_bpe_ranks = std::move(vectorToBPERanks(get_bpe_ranks(), get_bpe_ranks2()));
 	result.m_encoder = std::move(encoder);
-	result.m_decoder = std::move(decoder);
 	result.m_byte_encoder = bytes_to_unicode();
-	result.m_byte_decoder = unicode_to_bytes();
 
 	return result;
 }
@@ -145,20 +174,6 @@ size_t codepoint_length(const char c) {
 	else if((c & 0xe0) == 0xc0) return 2;
 	else return 1;
 }
-
-std::string GPT2Tokenizer::decode(const std::vector<int64_t>& token_ids) {
-	std::string decoded_string;
-	for (const auto& id: token_ids) {
-		std::string decoded_token = m_decoder[id];
-		for (size_t i = 0; i < decoded_token.size();) {
-			int length = codepoint_length(decoded_token[i]);
-			decoded_string += m_byte_decoder[decoded_token.substr(i, length)];
-			i+=length;
-		} 
-	}
-	return decoded_string;
-}
-
 
 std::vector<std::string> GPT2Tokenizer::tokenize(const std::string& text, const int max_len) {
 	std::vector<std::string> result;

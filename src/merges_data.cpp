@@ -25002,6 +25002,10 @@ const std::array<std::string, SIZE_BPE_RANKS> bpe_ranks[] = {
     "it", "ious",
     "ĠSky", "pe",
     "At", "l",
+};
+
+
+const std::array<std::string, SIZE_BPE_RANKS2> bpe_ranks2[] = {
     "ID", "ENT",
     "00", "8",
     "Ġhyp", "ocr",
@@ -50007,4 +50011,9 @@ const std::array<std::string, SIZE_BPE_RANKS> bpe_ranks[] = {
 
 const std::array<std::string, SIZE_BPE_RANKS>& get_bpe_ranks() {
 	return bpe_ranks[0];
+}
+
+
+const std::array<std::string, SIZE_BPE_RANKS2>& get_bpe_ranks2() {
+	return bpe_ranks2[0];
 }
