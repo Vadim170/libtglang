@@ -1,0 +1,66 @@
+old version
+
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - Python
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.16s user 0.03s system 150% cpu 0.124 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - Python
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.16s user 0.02s system 168% cpu 0.106 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - Python
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.16s user 0.02s system 169% cpu 0.103 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - Python
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.16s user 0.02s system 165% cpu 0.106 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - Python
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.15s user 0.02s system 155% cpu 0.110 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - Python
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.16s user 0.02s system 165% cpu 0.112 total
+
+version without vocab.json
+
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.14s user 0.02s system 49% cpu 0.329 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.13s user 0.01s system 209% cpu 0.069 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.13s user 0.02s system 194% cpu 0.076 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.13s user 0.01s system 187% cpu 0.078 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.13s user 0.02s system 194% cpu 0.076 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.13s user 0.02s system 195% cpu 0.075 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.13s user 0.02s system 191% cpu 0.078 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.13s user 0.02s system 196% cpu 0.075 total
+build > time ./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py
+/Users/vadimmakarov/Downloads/submission/1/tg_list.py - D
+./tglang-tester /Users/vadimmakarov/Downloads/submission/1/tg_list.py  0.13s user 0.02s system 196% cpu 0.076 total
+build > 

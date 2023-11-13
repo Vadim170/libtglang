@@ -2,3 +2,4 @@ libtglang.so
 **/.DS_Store
 libtglang.dylib
 src/build/**
+.vscode/**
