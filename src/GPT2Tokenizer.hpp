@@ -6,15 +6,16 @@
 #include <numeric>
 
 #include "ctre-unicode.hpp"
-#include "merges_data.h"
+// #include "merges_data.h"
 #include "vocab_keys.h"
+// #include <chrono>
 
 #include <stdio.h>
 
 // the code here is based on the transformers python package -> transformers.models.gpt2.GPT2Tokenizer
 
 template <class T>
-inline void hash_combine(std::size_t& seed, const T& v)
+inline void hash_combine(uint32_t& seed, const T& v)
 {
 	std::hash<T> hasher;
 	seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
@@ -34,16 +35,16 @@ std::unordered_map<std::string, char> unicode_to_bytes() {
 
 struct PairHash
 {
-	std::size_t operator()(const std::pair<std::string, std::string>& p) const noexcept
+	uint32_t operator()(const std::pair<std::string, std::string>& p) const noexcept
 	{
-		std::size_t seed = 0;
+		uint32_t seed = 0;
 		hash_combine(seed, p.first);
 		hash_combine(seed, p.second);
 		return seed;
 	}
 };
 using BPE = std::pair<std::string, std::string>;
-using BPERanks = std::unordered_map<BPE, size_t, PairHash>;
+using BPERanks = std::unordered_map<BPE, uint32_t, PairHash>;
 using Encoder = std::unordered_map<std::string, int16_t>;
 
 class GPT2Tokenizer {
@@ -54,22 +55,19 @@ class GPT2Tokenizer {
 public:
 
 	// static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input);
-	static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input1,
-		const std::array<std::string, SIZE_BPE_RANKS2>& input2);
-	static std::optional<GPT2Tokenizer> load();
+	// static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input1,
+	// 	const std::array<std::string, SIZE_BPE_RANKS2>& input2);
+	static GPT2Tokenizer load();
 
 	std::vector<int64_t> encode(const std::string&, const int max_len);
 	std::string decode(const std::vector<int64_t>&);
 	std::vector<std::string> tokenize(const std::string&, const int max_len);
-
-	size_t vocab_size() const noexcept { return m_encoder.size(); }
 	
 // protected:
 
 	GPT2Tokenizer() = default;
 
 	BPERanks m_bpe_ranks;
-	Encoder m_encoder;
 	std::unordered_map<char, std::string> m_byte_encoder;
 
 private:
@@ -99,59 +97,60 @@ private:
 
 //     return bpeRanks;
 // }
-BPERanks GPT2Tokenizer::vectorToBPERanks(
-    const std::array<std::string, SIZE_BPE_RANKS>& input1,
-    const std::array<std::string, SIZE_BPE_RANKS2>& input2)
-{
-    BPERanks bpeRanks;
-    int32_t index = 0;
-    std::pair<std::string, std::string> pair;
+// inline BPERanks GPT2Tokenizer::vectorToBPERanks(
+//     const std::array<std::string, SIZE_BPE_RANKS>& input1,
+//     const std::array<std::string, SIZE_BPE_RANKS2>& input2)
+// {
+//     BPERanks bpeRanks;
+//     int32_t index = 0;
+//     std::pair<std::string, std::string> pair;
 
-    for (const std::string& str : input1)
-    {
-        if (pair.first.empty())
-        {
-            pair.first = str;
-        }
-        else
-        {
-            pair.second = str;
-            bpeRanks[pair] = index++;
-            pair.first.clear();
-            pair.second.clear();
-        }
-    }
+//     for (const std::string& str : input1)
+//     {
+//         if (pair.first.empty())
+//         {
+//             pair.first = str;
+//         }
+//         else
+//         {
+//             pair.second = str;
+//             bpeRanks[pair] = index++;
+//             pair.first.clear();
+//             pair.second.clear();
+//         }
+//     }
 
-    for (const std::string& str : input2)
-    {
-        if (pair.first.empty())
-        {
-            pair.first = str;
-        }
-        else
-        {
-            pair.second = str;
-            bpeRanks[pair] = index++;
-            pair.first.clear();
-            pair.second.clear();
-        }
-    }
+//     for (const std::string& str : input2)
+//     {
+//         if (pair.first.empty())
+//         {
+//             pair.first = str;
+//         }
+//         else
+//         {
+//             pair.second = str;
+//             bpeRanks[pair] = index++;
+//             pair.first.clear();
+//             pair.second.clear();
+//         }
+//     }
 
-    return bpeRanks;
-}
+//     return bpeRanks;
+// }
 
-std::optional<GPT2Tokenizer> GPT2Tokenizer::load() {
-	Encoder encoder;
+GPT2Tokenizer GPT2Tokenizer::load() {
+	// std::chrono::steady_clock::time_point start_time, end_time;
+	// std::chrono::duration<double, std::milli> elapsed_time;
 
-	for (size_t i = 0; i < SIZE_VOCAB_KEYS; ++i) {
-		encoder.emplace(global_vocab_keys[i], static_cast<int64_t>(i));
-	}
-
+	// start_time = std::chrono::steady_clock::now();
 	auto result = GPT2Tokenizer();
-	result.m_bpe_ranks = std::move(vectorToBPERanks(global_bpe_ranks, global_bpe_ranks2));
-	result.m_encoder = std::move(encoder);
+	BPERanks bpeRanks;
+	result.m_bpe_ranks = bpeRanks; //std::move(vectorToBPERanks(global_bpe_ranks, global_bpe_ranks2));
 	result.m_byte_encoder = bytes_to_unicode();
 
+	// end_time = std::chrono::steady_clock::now();
+	// elapsed_time = end_time - start_time;
+	// printf("Time to load tokenizer1: %.4f ms\n", elapsed_time.count());
 	return result;
 }
 
@@ -160,10 +159,26 @@ std::vector<int64_t> GPT2Tokenizer::encode(const std::string& text, const int ma
 	std::vector<std::string> tokens = tokenize(text, max_len);
 	std::vector<int64_t> token_ids;
 	token_ids.reserve(tokens.size());
-	std::transform(tokens.begin(), tokens.end(), std::back_inserter(token_ids),
-				[this](const std::string& token){
-					return m_encoder[token]; 
-				});
+	// std::transform(tokens.begin(), tokens.end(), std::back_inserter(token_ids),
+	// 			[this](const std::string& token){
+	// 				return m_encoder[token];
+	// 			});
+	for (const std::string& token : tokens) {
+		// Find the index of 'token' in global_vocab_keys
+		auto it = std::find(global_vocab_keys.begin(), global_vocab_keys.end(), token);
+		
+		if (it != global_vocab_keys.end()) {
+			// 'token' was found in global_vocab_keys
+			// Calculate the index and add it to token_ids
+			size_t index = std::distance(global_vocab_keys.begin(), it);
+			token_ids.push_back(static_cast<int64_t>(index));
+		} else {
+			// 'token' was not found in global_vocab_keys
+			// Handle this case accordingly, e.g., raise an error or provide a default value
+			// Here, we just add a special value to indicate it's not found
+			token_ids.push_back(-1); // or any other suitable value
+		}
+	}
 	return token_ids;
 }
 

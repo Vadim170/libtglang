@@ -57,6 +57,38 @@ enum TglangLanguage {
   TGLANG_LANGUAGE_XML
 };
 
+float categoryThresholds[TGLANG_LANGUAGE_COUNT] = {
+    0, // Threshold for TGLANG_LANGUAGE_OTHER
+    0.9, // Threshold for TGLANG_LANGUAGE_C
+    0.95, // Threshold for TGLANG_LANGUAGE_CPLUSPLUS
+    0.95, // Threshold for TGLANG_LANGUAGE_CSHARP
+    0.95, // Threshold for TGLANG_LANGUAGE_CSS
+    0.95, // Threshold for TGLANG_LANGUAGE_DART
+    0.95, // Threshold for TGLANG_LANGUAGE_DOCKER
+    0.95, // Threshold for TGLANG_LANGUAGE_FUNC
+    0.95, // Threshold for TGLANG_LANGUAGE_GO
+    0.9, // Threshold for TGLANG_LANGUAGE_HTML
+    0.95, // Threshold for TGLANG_LANGUAGE_JAVA
+    0.95, // Threshold for TGLANG_LANGUAGE_JAVASCRIPT
+    0.95, // Threshold for TGLANG_LANGUAGE_JSON
+    0.95, // Threshold for TGLANG_LANGUAGE_KOTLIN
+    0.95, // Threshold for TGLANG_LANGUAGE_LUA
+    0.95, // Threshold for TGLANG_LANGUAGE_NGINX
+    0.95, // Threshold for TGLANG_LANGUAGE_OBJECTIVE_C
+    0.95, // Threshold for TGLANG_LANGUAGE_PHP
+    0.95, // Threshold for TGLANG_LANGUAGE_POWERSHELL
+    0.95, // Threshold for TGLANG_LANGUAGE_PYTHON
+    0.95, // Threshold for TGLANG_LANGUAGE_RUBY
+    0.95, // Threshold for TGLANG_LANGUAGE_RUST
+    0.95, // Threshold for TGLANG_LANGUAGE_SHELL
+    0.95, // Threshold for TGLANG_LANGUAGE_SOLIDITY
+    0.95, // Threshold for TGLANG_LANGUAGE_SQL
+    0.95, // Threshold for TGLANG_LANGUAGE_SWIFT
+    0.95, // Threshold for TGLANG_LANGUAGE_TL
+    0.95, // Threshold for TGLANG_LANGUAGE_TYPESCRIPT
+    0.95, // Threshold for TGLANG_LANGUAGE_XML
+};
+
 /**
  * Detects programming language of a code snippet.
  * \param[in] text Text of a code snippet. A null-terminated string in UTF-8 encoding.
