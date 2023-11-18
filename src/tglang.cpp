@@ -136,7 +136,7 @@ enum TglangLanguage tglang_detect_programming_language(const char *text) {
 	int8_t max_index = 0;
 	float max_value = floatarr[0];
 	for (int8_t i = 1; i < TGLANG_LANGUAGE_COUNT; ++i) {
-		printf("run: %d %.5f ms\n", i, floatarr[i]);
+		printf("category %d: %.5f\n", i, floatarr[i]);
 		if (floatarr[i] > max_value) {
 			max_value = floatarr[i];
 			max_index = i;
