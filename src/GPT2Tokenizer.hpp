@@ -142,14 +142,13 @@ BPERanks GPT2Tokenizer::vectorToBPERanks(
 
 std::optional<GPT2Tokenizer> GPT2Tokenizer::load() {
 	Encoder encoder;
-	
-	const std::array<std::string, SIZE_VOCAB_KEYS> vocab_keys = get_vocab_keys();
+
 	for (size_t i = 0; i < SIZE_VOCAB_KEYS; ++i) {
-		encoder.emplace(vocab_keys[i], static_cast<int64_t>(i));
+		encoder.emplace(global_vocab_keys[i], static_cast<int64_t>(i));
 	}
 
 	auto result = GPT2Tokenizer();
-	result.m_bpe_ranks = std::move(vectorToBPERanks(get_bpe_ranks(), get_bpe_ranks2()));
+	result.m_bpe_ranks = std::move(vectorToBPERanks(global_bpe_ranks, global_bpe_ranks2));
 	result.m_encoder = std::move(encoder);
 	result.m_byte_encoder = bytes_to_unicode();
 

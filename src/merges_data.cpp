@@ -1,7 +1,6 @@
-#pragma once
 #include "merges_data.h"
 
-const std::array<std::string, SIZE_BPE_RANKS> bpe_ranks[] = {
+const std::array<std::string, SIZE_BPE_RANKS> global_bpe_ranks = {
     "Ġ", "t",
     "Ġ", "a",
     "h", "e",
@@ -25005,7 +25004,7 @@ const std::array<std::string, SIZE_BPE_RANKS> bpe_ranks[] = {
 };
 
 
-const std::array<std::string, SIZE_BPE_RANKS2> bpe_ranks2[] = {
+const std::array<std::string, SIZE_BPE_RANKS2> global_bpe_ranks2 = {
     "ID", "ENT",
     "00", "8",
     "Ġhyp", "ocr",
@@ -50007,13 +50006,3 @@ const std::array<std::string, SIZE_BPE_RANKS2> bpe_ranks2[] = {
     "Ġinform", "ants",
     "Ġg", "azed",
 };
-
-
-const std::array<std::string, SIZE_BPE_RANKS>& get_bpe_ranks() {
-	return bpe_ranks[0];
-}
-
-
-const std::array<std::string, SIZE_BPE_RANKS2>& get_bpe_ranks2() {
-	return bpe_ranks2[0];
-}

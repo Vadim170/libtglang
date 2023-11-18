@@ -5,7 +5,6 @@
 #include <cpu_provider_factory.h>
 // #include <chrono>
 
-#include "config.hpp"
 #include "GPT2Tokenizer.hpp"
 #include "model_wrapper.h"
 
@@ -73,12 +72,10 @@ void my_init_function(void) {
 	printf("Model prepare time: %.4f ms\n", elapsed_time.count());
 }
 
-// Use the constructor attribute to specify that my_init_function should be executed on library load
-// void (*init_ptr)(void) __attribute__((constructor)) = my_init_function;
-static bool inited = [](){
- my_init_function();
- return true;
-}();
+// static bool inited = [](){
+//  my_init_function();
+//  return true;
+// }();
 
 void preprocess_text(const char* text, int64_t** input_data, size_t* input_data_size, int64_t* input_dims, size_t* num_input_dims) {
 	auto token_ids = tokenizer->encode(text, 256);
@@ -110,6 +107,8 @@ void preprocess_text(const char* text, int64_t** input_data, size_t* input_data_
 }
 
 enum TglangLanguage tglang_detect_programming_language(const char *text) {
+	my_init_function();
+	
 	std::chrono::steady_clock::time_point start_time, end_time;
 	std::chrono::duration<double, std::milli> elapsed_time;
 	start_time = std::chrono::steady_clock::now();

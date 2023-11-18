@@ -1,6 +1,6 @@
 #include "vocab_keys.h"
 
-const std::array<std::string, SIZE_VOCAB_KEYS> vocab_keys[] = {
+const std::array<std::string, SIZE_VOCAB_KEYS> global_vocab_keys = {
     "!",
     "\"",
     "#",
@@ -50259,7 +50259,3 @@ const std::array<std::string, SIZE_VOCAB_KEYS> vocab_keys[] = {
     "Ġgazed",
     "<|endoftext|>",
 };
-
-const std::array<std::string, SIZE_VOCAB_KEYS>& get_vocab_keys() {
-	return vocab_keys[0];
-}
