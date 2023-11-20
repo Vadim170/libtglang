@@ -6,7 +6,7 @@
 #include <numeric>
 
 #include "ctre-unicode.hpp"
-// #include "merges_data.h"
+#include "merges_data.h"
 #include "vocab_keys.h"
 // #include <chrono>
 
@@ -54,9 +54,9 @@ class GPT2Tokenizer {
 
 public:
 
-	// static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input);
-	// static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input1,
-	// 	const std::array<std::string, SIZE_BPE_RANKS2>& input2);
+	static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input);
+	static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input1,
+		const std::array<std::string, SIZE_BPE_RANKS2>& input2);
 	static GPT2Tokenizer load();
 
 	std::vector<int64_t> encode(const std::string&, const int max_len);
@@ -97,60 +97,68 @@ private:
 
 //     return bpeRanks;
 // }
-// inline BPERanks GPT2Tokenizer::vectorToBPERanks(
-//     const std::array<std::string, SIZE_BPE_RANKS>& input1,
-//     const std::array<std::string, SIZE_BPE_RANKS2>& input2)
-// {
-//     BPERanks bpeRanks;
-//     int32_t index = 0;
-//     std::pair<std::string, std::string> pair;
+inline BPERanks GPT2Tokenizer::vectorToBPERanks(
+	const std::array<std::string, SIZE_BPE_RANKS>& input1,
+	const std::array<std::string, SIZE_BPE_RANKS2>& input2)
+{
+	// std::chrono::steady_clock::time_point start_time, end_time;
+	// std::chrono::duration<double, std::milli> elapsed_time;
 
-//     for (const std::string& str : input1)
-//     {
-//         if (pair.first.empty())
-//         {
-//             pair.first = str;
-//         }
-//         else
-//         {
-//             pair.second = str;
-//             bpeRanks[pair] = index++;
-//             pair.first.clear();
-//             pair.second.clear();
-//         }
-//     }
+	// start_time = std::chrono::steady_clock::now();
+	BPERanks bpeRanks;
+	bpeRanks.reserve(SIZE_BPE_RANKS + SIZE_BPE_RANKS2);
+	int32_t index = 0;
+	std::pair<std::string, std::string> pair;
 
-//     for (const std::string& str : input2)
-//     {
-//         if (pair.first.empty())
-//         {
-//             pair.first = str;
-//         }
-//         else
-//         {
-//             pair.second = str;
-//             bpeRanks[pair] = index++;
-//             pair.first.clear();
-//             pair.second.clear();
-//         }
-//     }
+	for (const std::string& str : input1)
+	{
+		if (pair.first.empty())
+		{
+			pair.first = str;
+		}
+		else
+		{
+			pair.second = str;
+			bpeRanks[pair] = index++;
+		}
+	}
+	// end_time = std::chrono::steady_clock::now();
+	// elapsed_time = end_time - start_time;
+	// printf("Time to load towkenizer1: %.4f ms\n", elapsed_time.count());
 
-//     return bpeRanks;
-// }
+	// start_time = std::chrono::steady_clock::now();
+	for (const std::string& str : input2)
+	{
+		if (pair.first.empty())
+		{
+			pair.first = str;
+		}
+		else
+		{
+			pair.second = str;
+			bpeRanks[pair] = index++;
+		}
+	}
+	// end_time = std::chrono::steady_clock::now();
+	// elapsed_time = end_time - start_time;
+	// printf("Time to load towwkenizer1: %.4f ms\n", elapsed_time.count());
+
+	return bpeRanks;
+}
 
 GPT2Tokenizer GPT2Tokenizer::load() {
 	// std::chrono::steady_clock::time_point start_time, end_time;
 	// std::chrono::duration<double, std::milli> elapsed_time;
 
-	// start_time = std::chrono::steady_clock::now();
 	auto result = GPT2Tokenizer();
 	BPERanks bpeRanks;
-	result.m_bpe_ranks = bpeRanks; //std::move(vectorToBPERanks(global_bpe_ranks, global_bpe_ranks2));
-	result.m_byte_encoder = bytes_to_unicode();
-
+	// start_time = std::chrono::steady_clock::now();
+	result.m_bpe_ranks = std::move(vectorToBPERanks(global_bpe_ranks, global_bpe_ranks2));
 	// end_time = std::chrono::steady_clock::now();
 	// elapsed_time = end_time - start_time;
 	// printf("Time to load tokenizer1: %.4f ms\n", elapsed_time.count());
+	result.m_byte_encoder = bytes_to_unicode();
+
 	return result;
 }
 
