@@ -35,15 +35,32 @@ std::unordered_map<std::string, char> unicode_to_bytes() {
 
 struct PairHash
 {
-	uint32_t operator()(const std::pair<std::string, std::string>& p) const noexcept
-	{
-		uint32_t seed = 0;
-		hash_combine(seed, p.first);
-		hash_combine(seed, p.second);
-		return seed;
-	}
+    uint32_t operator()(const std::pair<std::string_view, std::string_view>& p) const noexcept
+    {
+        uint32_t seed = 0;
+        hash_combine(seed, p.first);
+        hash_combine(seed, p.second);
+        return seed;
+    }
+
+private:
+    template <class T>
+    static inline void hash_combine(uint32_t& seed, const T& v)
+    {
+        std::hash<T> hasher;
+        seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+
+    static inline void hash_combine(uint32_t& seed, std::string_view v)
+    {
+        // Simple loop to hash the contents of the string_view
+        for (char c : v)
+        {
+            seed ^= std::hash<char>()(c) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+    }
 };
-using BPE = std::pair<std::string, std::string>;
+using BPE = std::pair<std::string_view, std::string_view>;
 using BPERanks = std::unordered_map<BPE, uint32_t, PairHash>;
 using Encoder = std::unordered_map<std::string, int16_t>;
 
@@ -54,9 +71,9 @@ class GPT2Tokenizer {
 
 public:
 
-	static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input);
-	static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input1,
-		const std::array<std::string, SIZE_BPE_RANKS2>& input2);
+	// static BPERanks vectorToBPERanks(const std::array<std::string, SIZE_BPE_RANKS>& input);
+	static BPERanks vectorToBPERanks(const std::array<std::string_view, SIZE_BPE_RANKS>& input1,
+		const std::array<std::string_view, SIZE_BPE_RANKS2>& input2);
 	static GPT2Tokenizer load();
 
 	std::vector<int64_t> encode(const std::string&, const int max_len);
@@ -98,50 +115,66 @@ private:
 //     return bpeRanks;
 // }
 inline BPERanks GPT2Tokenizer::vectorToBPERanks(
-	const std::array<std::string, SIZE_BPE_RANKS>& input1,
-	const std::array<std::string, SIZE_BPE_RANKS2>& input2)
+	const std::array<std::string_view, SIZE_BPE_RANKS>& input1,
+	const std::array<std::string_view, SIZE_BPE_RANKS2>& input2)
 {
 	// std::chrono::steady_clock::time_point start_time, end_time;
 	// std::chrono::duration<double, std::milli> elapsed_time;
 
 	// start_time = std::chrono::steady_clock::now();
 	BPERanks bpeRanks;
-	bpeRanks.reserve(SIZE_BPE_RANKS + SIZE_BPE_RANKS2);
-	int32_t index = 0;
-	std::pair<std::string, std::string> pair;
+	bpeRanks.reserve(SIZE_BPE_RANKS/2 + SIZE_BPE_RANKS2/2);
+	uint32_t index = 0;
 
-	for (const std::string& str : input1)
-	{
-		if (pair.first.empty())
-		{
-			pair.first = str;
-		}
-		else
-		{
-			pair.second = str;
-			bpeRanks[pair] = index++;
-		}
-	}
-	// end_time = std::chrono::steady_clock::now();
-	// elapsed_time = end_time - start_time;
-	// printf("Time to load towkenizer1: %.4f ms\n", elapsed_time.count());
+    for (size_t i = 0; i < input1.size(); i += 2)
+    {
+        bpeRanks[std::make_pair(input1[i], input1[i + 1])] = index++;
+    }
 
-	// start_time = std::chrono::steady_clock::now();
-	for (const std::string& str : input2)
-	{
-		if (pair.first.empty())
-		{
-			pair.first = str;
-		}
-		else
-		{
-			pair.second = str;
-			bpeRanks[pair] = index++;
-		}
-	}
-	// end_time = std::chrono::steady_clock::now();
-	// elapsed_time = end_time - start_time;
-	// printf("Time to load towwkenizer1: %.4f ms\n", elapsed_time.count());
+    for (size_t i = 0; i < input2.size(); i += 2)
+    {
+        bpeRanks[std::make_pair(input2[i], input2[i + 1])] = index++;
+    }
+	// int32_t index = 0;
+	// int32_t index2 = 0;
+	// std::pair<std::string, std::string> pair;
+	// pair.first.reserve(128); // Assuming a reasonable max length for optimization
+	// pair.second.reserve(128);
+
+	// for (const std::string_view& str : input1)
+	// {
+	// 	if (index == index2)
+	// 	{
+	// 		pair.first = str;
+	// 		index++;
+	// 	}
+	// 	else
+	// 	{
+	// 		pair.second = str;
+	// 		bpeRanks[pair] = index2++;
+	// 	}
+	// }
+	// // end_time = std::chrono::steady_clock::now();
+	// // elapsed_time = end_time - start_time;
+	// // printf("Time to load towkenizer1: %.4f ms\n", elapsed_time.count());
+
+	// // start_time = std::chrono::steady_clock::now();
+	// for (const std::string_view& str : input2)
+	// {
+	// 	if (index == index2)
+	// 	{
+	// 		pair.first = str;
+	// 		index++;
+	// 	}
+	// 	else
+	// 	{
+	// 		pair.second = str;
+	// 		bpeRanks[pair] = index2++;
+	// 	}
+	// }
+	// // end_time = std::chrono::steady_clock::now();
+	// // elapsed_time = end_time - start_time;
+	// // printf("Time to load towwkenizer1: %.4f ms\n", elapsed_time.count());
 
 	return bpeRanks;
 }
@@ -281,7 +314,7 @@ std::vector<std::string> GPT2Tokenizer::bpe(const std::string& token) {
 			i = std::distance(word.begin(), wordIterator);
 
 			if (word[i] == first && i < word.size() -1 && word[i+1] == second) {
-				new_word.push_back(first + second);
+				new_word.push_back(std::string(first) + std::string(second));
 				i += 2;
 			} else {
 				new_word.push_back(word[i]);

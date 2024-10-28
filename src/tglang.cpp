@@ -16,6 +16,7 @@
 static Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
 static std::unique_ptr<GPT2Tokenizer> tokenizer;
 static std::unique_ptr<Ort::Session> onnx_session;
+static bool inited = false;
 
 void my_init_function(void) {
 	// std::chrono::steady_clock::time_point start_time, end_time;
@@ -45,6 +46,7 @@ void my_init_function(void) {
 	// end_time = std::chrono::steady_clock::now();
 	// elapsed_time = end_time - start_time;
 	// printf("Model prepare time: %.4f ms\n", elapsed_time.count());
+	inited = true;
 }
 
 // static bool inited = [](){
@@ -82,7 +84,8 @@ void preprocess_text(const char* text, int64_t** input_data, size_t* input_data_
 }
 
 enum TglangLanguage tglang_detect_programming_language(const char *text) {
-	my_init_function();
+	if(!inited)
+		my_init_function();
 	
 	// std::chrono::steady_clock::time_point start_time, end_time;
 	// std::chrono::duration<double, std::milli> elapsed_time;

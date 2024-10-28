@@ -1,6 +1,6 @@
 #include "merges_data.h"
 
-const std::array<std::string, SIZE_BPE_RANKS> global_bpe_ranks = {
+const std::array<std::string_view, SIZE_BPE_RANKS> global_bpe_ranks = {
     "Ġ", "t",
     "Ġ", "a",
     "h", "e",

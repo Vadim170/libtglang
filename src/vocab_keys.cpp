@@ -1,6 +1,6 @@
 #include "vocab_keys.h"
 
-const std::array<std::string, SIZE_VOCAB_KEYS> global_vocab_keys = {
+const std::array<std::string_view, SIZE_VOCAB_KEYS> global_vocab_keys = {
     "!",
     "\"",
     "#",

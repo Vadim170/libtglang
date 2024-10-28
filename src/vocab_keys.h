@@ -6,6 +6,6 @@
 
 #define SIZE_VOCAB_KEYS 50257
 
-extern const std::array<std::string, SIZE_VOCAB_KEYS> global_vocab_keys;
+extern const std::array<std::string_view, SIZE_VOCAB_KEYS> global_vocab_keys;
 
 #endif // VOCAB_KEYS_H

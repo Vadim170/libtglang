@@ -3,3 +3,6 @@ libtglang.so
 libtglang.dylib
 src/build/**
 .vscode/**
+train/raw_data_v2.zip
+train/ml2023-r1-dataset.tar
+train/ml2023-d1-dataset.tar
