@@ -9,9 +9,11 @@ Contest first results:
 https://t.me/contest/341
 
 This project line:
+```
     | Entry | Result | Time  
 ----+-------+--------+-------
 6.  | 4672  | 74.5%  | 265ms
+```
 
 
 ## Build
